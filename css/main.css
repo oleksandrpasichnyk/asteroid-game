@@ -11,10 +11,14 @@ body {
 }
 
 header {
-  padding: 5vh 50px 0;
+  padding: 5vh 15vw 0;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+}
+
+#score-container {
+  width: 200px;
 }
 
 .game-container {
