@@ -33,3 +33,34 @@ header {
   height: 70vh;
   border: 2px solid #fff;
 }
+
+#modal-window-container {
+  position: absolute;
+  width: 70vw;
+  height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#modal-window-title {
+  font-size: 2.5em;
+  margin-bottom: 50px;
+}
+
+#start-game-btn {
+  background-color: rgb(7, 7, 7);
+  border: 2px #ccc solid;
+  color: #ccc;
+  padding: 20px 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
+  transition: 0.1s ease-in-out all;
+}
+
+#start-game-btn:hover {
+  border: 2px #fff solid;
+  color: #fff;
+}

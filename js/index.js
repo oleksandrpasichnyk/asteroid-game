@@ -3,6 +3,9 @@ import { Ship, Asteroid } from './entities.js';
 import { bulletAsteroidCollision, createRandomAsteroid, shipAsteroidCollision } from './helpers.js';
 
 const canvas = document.getElementById("canvas");
+const startGameBtn = document.getElementById("start-game-btn");
+const modalWindowContainer = document.getElementById("modal-window-container");
+const modalWindowTitle = document.getElementById("modal-window-title");
 const score = document.getElementById("score");
 
 export const ctx = canvas.getContext("2d");
@@ -36,9 +39,6 @@ function init() {
   canvas.width = canvas.clientWidth;
   canvas.height = canvas.clientHeight;
 
-  gameScore = 0;
-  gameAsteroids = [];
-
   gameShip = new Ship("#fff", canvas.width / 2, canvas.height / 2);
   gameShip.draw();
 
@@ -68,11 +68,20 @@ function init() {
   })
 }
 
-init();
+function startGame(){
+  setTimeout(() => {
+    modalWindowContainer.style.display = 'none';
+    gameScore = 0;
+    gameAsteroids = [];
+    init();
+  }, 300);
+}
 
 function finishGame(){
   clearInterval(gameRender);
   (new Sound("../sounds/spaceship-system-break-down.wav")).play();
+  modalWindowContainer.style.display = 'flex';
+  modalWindowTitle.textContent = 'Your score is ' + gameScore;
 }
 
 function updateGameArea() {
@@ -115,3 +124,5 @@ function updateGameArea() {
     });
   });
 }
+
+startGameBtn.addEventListener('click', startGame);
