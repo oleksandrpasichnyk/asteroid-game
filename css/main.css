@@ -11,6 +11,7 @@ body {
 }
 
 header {
+  visibility: hidden;
   padding: 5vh 15vw 0;
   display: flex;
   justify-content: space-between;

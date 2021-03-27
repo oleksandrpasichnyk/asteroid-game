@@ -1,21 +1,25 @@
-import { Sound } from './sounds.js';
+import { GameSounds } from './sounds.js';
 import { Ship, Asteroid } from './entities.js';
 import { bulletAsteroidCollision, createRandomAsteroid, shipAsteroidCollision } from './helpers.js';
 
 const canvas = document.getElementById("canvas");
+canvas.width = canvas.clientWidth;
+canvas.height = canvas.clientHeight;
 const startGameBtn = document.getElementById("start-game-btn");
 const modalWindowContainer = document.getElementById("modal-window-container");
 const modalWindowTitle = document.getElementById("modal-window-title");
-const score = document.getElementById("score");
+const header = document.getElementById("header");
+const scoreValue = document.getElementById("score");
+const lifesValue = document.getElementById("lifes");
 
 export const ctx = canvas.getContext("2d");
 export const ASTEROIDS_COUNT = 10;
 export const ASTEROIDS_SPEED = 1;
-export const FPS = 50;
+export const FPS = 60;
 
 export let gameShip, gameScore = 0;
 export let gameAsteroids = [];
-let gameRender;
+let gameRender, backgroundRender;
 
 export const asteroidParams = {
   1: {
@@ -36,21 +40,17 @@ export const asteroidParams = {
 }
 
 function init() {
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
-
   gameShip = new Ship("#fff", canvas.width / 2, canvas.height / 2);
   gameShip.draw();
+  setTimeout(() => {
+    gameShip.isRestored = true;
+  }, 2000);
 
   for (let i = 0; i < ASTEROIDS_COUNT; i++) {
     let newAsteroid = createRandomAsteroid();
     gameAsteroids.push(newAsteroid);
     newAsteroid.draw();
   }
-
-  // let ast = new Asteroid(150, 150, 0, 4);
-  // gameAsteroids.push(ast);
-  // ast.draw();
 
   gameRender = setInterval(updateGameArea, 1000/FPS);
 
@@ -71,28 +71,68 @@ function init() {
 function startGame(){
   setTimeout(() => {
     modalWindowContainer.style.display = 'none';
+    header.style.visibility = 'visible';
+    clearInterval(backgroundRender);
+    scoreValue.textContent = 0;
     gameScore = 0;
     gameAsteroids = [];
     init();
+    lifesValue.textContent = gameShip.lifes.toString();
   }, 300);
+  setTimeout(() => {
+    gameShip.isReatored = true;
+  }, 2000);
+  GameSounds.playBackground();
+}
+
+function displayAsteroidsBackground(){
+  for (let i = 0; i < ASTEROIDS_COUNT; i++) {
+    let newAsteroid = createRandomAsteroid();
+    gameAsteroids.push(newAsteroid);
+    newAsteroid.draw();
+  }
+  backgroundRender = setInterval(updateAsteroidBackground, 1000/FPS);
 }
 
 function finishGame(){
   clearInterval(gameRender);
-  (new Sound("../sounds/spaceship-system-break-down.wav")).play();
+  GameSounds.stopBackground();
+  GameSounds.stopBoost();
+  // GameSounds.break();
   modalWindowContainer.style.display = 'flex';
   modalWindowTitle.textContent = 'Your score is ' + gameScore;
 }
 
+function restoreShip(){
+  gameShip.x = canvas.width / 2;
+  gameShip.y = canvas.height / 2;
+  gameShip.speed = 0;
+  gameShip.angle = 0;
+  gameShip.isBoost = false;
+  gameShip.isRestored = false;
+  gameShip.isAbleToMove = false;
+  gameShip.additionalSpeed = 0;
+  gameShip.update();
+  gameShip.draw();
+  GameSounds.stopBoost();
+  setTimeout(() => {
+    gameShip.isAbleToMove = true;
+  }, 500);
+
+  setTimeout(() => {
+    gameShip.isRestored = true;
+  }, 2000);
+}
+
 function updateGameArea() {
-  let isFire = false;
+  let isBoost = false;
   gameShip.clear();
   gameShip.speed = 0;
   gameShip.moveAngle = 0;
 
   if (gameShip.keys && gameShip.keys['ArrowUp']) {
     gameShip.speed = 5;
-    isFire = true;
+    isBoost = true;
   }
   if (gameShip.keys && gameShip.keys['ArrowLeft']) {
     gameShip.moveAngle = -Math.PI * 1.1;
@@ -101,28 +141,52 @@ function updateGameArea() {
     gameShip.moveAngle = Math.PI * 1.1;
   }
 
+  if(isBoost !== gameShip.isBoost && gameShip.isAbleToMove){
+    console.log(isBoost);
+    isBoost ? GameSounds.playBoost() : GameSounds.stopBoost();
+  }
+  gameShip.isBoost = isBoost;
   gameShip.update();
-  gameShip.draw(isFire);
+  gameShip.draw();
+
   gameShip.bullets.forEach(bullet => {
     bullet.update();
     bullet.draw();
   });
   gameAsteroids.forEach(asteroid => {
-    asteroid.update();
-    asteroid.draw();
-    if(shipAsteroidCollision(asteroid)){
-      finishGame();
-    };
+    if(gameShip.isRestored){
+      if(shipAsteroidCollision(asteroid)){
+        gameShip.lifes--;
+        lifesValue.textContent = gameShip.lifes.toString();
+        if(gameShip.lifes === 0){
+          finishGame();
+        }else {
+          GameSounds.break();
+          restoreShip();
+        }
+      };
+    }
     gameShip.bullets.forEach(bullet => {
       if(bulletAsteroidCollision(bullet, asteroid)){
-        (new Sound("../sounds/falling-hit.wav")).play();
+        GameSounds.bang();
         asteroid.destroy();
         gameShip.bullets.splice(gameShip.bullets.indexOf(bullet), 1);
         gameScore += asteroidParams[asteroid.size].score;
-        score.textContent = gameScore;
+        scoreValue.textContent = gameScore;
       }
     });
+    asteroid.update();
+    asteroid.draw();
+  });
+}
+
+function updateAsteroidBackground() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  gameAsteroids.forEach(asteroid => {
+    asteroid.update();
+    asteroid.draw();
   });
 }
 
 startGameBtn.addEventListener('click', startGame);
+displayAsteroidsBackground();

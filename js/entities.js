@@ -1,10 +1,10 @@
 import { createPath, asteroidPath1, asteroidPath2, asteroidPath3 } from './paths.js';
 import { ctx, ASTEROIDS_SPEED, FPS, ASTEROIDS_COUNT, gameAsteroids, gameShip, asteroidParams } from './index.js';
 import { getRotatedCoorditates, createRandomAsteroid } from './helpers.js';
-import { Sound } from './sounds.js';
+import { Sound, GameSounds } from './sounds.js';
 
 const asteroidPaths = [asteroidPath1, asteroidPath2, asteroidPath3];
-const shipPath = [{x: 15, y: 15}, {x: 0, y: -30}, {x: -15, y: 15}, {x: 15, y: 15}];
+const shipPath = [{x: 15, y: 15}, {x: 0, y: -30}, {x: -15, y: 15}, {x: -10, y: 0}, {x: 10, y: 0}, {x: 15, y: 15}];
 
 class Ship {
   constructor(color, x, y) {
@@ -14,43 +14,32 @@ class Ship {
     this.speed = 0;
     this.angle = 0;
     this.moveAngle = 0;
+    this.lifes = 3;
+    this.isBoost = false;
+    this.isRestored = false;
+    this.isAbleToMove = true;
 
     this.additionalSpeed = 0;
     this.brakes = 0.98;
-
+    this.path;
     this.bullets = [];
 
-    this.draw = function (isFire) {
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.angle);
-      ctx.translate(-this.x, -this.y);
+    this.draw = function () {
       ctx.strokeStyle = this.color;
 
-      ctx.beginPath();
-      ctx.moveTo(this.x + 15, this.y + 15);
-      ctx.lineTo(this.x, this.y - 30);
-      ctx.lineTo(this.x - 15, this.y + 15);
-      ctx.moveTo(this.x - 10, this.y);
-      ctx.lineTo(this.x + 10, this.y);
-      if (isFire) {
-        this.additionalSpeed = 5;
-        ctx.moveTo(this.x - 5, this.y);
-        ctx.lineTo(this.x, this.y + 15);
-        ctx.lineTo(this.x + 5, this.y);
-      }
       ctx.lineWidth = 2;
-      ctx.stroke();
-      ctx.restore();
+      ctx.stroke(this.getPath());
     };
     this.update = function () {
       if (this.speed === 0) {
         this.speed = this.additionalSpeed * this.brakes;
         this.additionalSpeed *= this.brakes;
       }
-      this.angle += this.moveAngle * Math.PI / 180;
-      this.x += (this.speed) * Math.sin(this.angle);
-      this.y -= (this.speed) * Math.cos(this.angle);
+      if(this.isAbleToMove){
+        this.angle += this.moveAngle * Math.PI / 180;
+        this.x += (this.speed) * Math.sin(this.angle);
+        this.y -= (this.speed) * Math.cos(this.angle);
+      }
       if (this.x < 0) {
         this.x = canvas.width - this.x;
       } else if (this.x > canvas.width) {
@@ -63,7 +52,21 @@ class Ship {
       }
     };
     this.getPath = function () {
-      return createPath(this.x, this.y, 1, shipPath);
+      let path = new Path2D();
+
+      path.moveTo(...Object.values(getRotatedCoorditates(this.x, this.y, this.x + 15, this.y + 15, this.angle)));
+      path.lineTo(...Object.values(getRotatedCoorditates(this.x, this.y, this.x, this.y - 30, this.angle)));
+      path.lineTo(...Object.values(getRotatedCoorditates(this.x, this.y, this.x - 15, this.y + 15, this.angle)));
+      path.moveTo(...Object.values(getRotatedCoorditates(this.x, this.y, this.x - 10, this.y, this.angle)));
+      path.lineTo(...Object.values(getRotatedCoorditates(this.x, this.y, this.x + 10, this.y, this.angle)));
+      if (this.isBoost) {
+        this.additionalSpeed = 5;
+        path.moveTo(...Object.values(getRotatedCoorditates(this.x, this.y, this.x - 5, this.y, this.angle)));
+        path.lineTo(...Object.values(getRotatedCoorditates(this.x, this.y, this.x, this.y + 15, this.angle)));
+        path.lineTo(...Object.values(getRotatedCoorditates(this.x, this.y, this.x + 5, this.y, this.angle)));
+      }
+
+      return path;
     };
     this.getCoordinates = function () {
       let сoordinates = [];
@@ -80,7 +83,7 @@ class Ship {
       let bullet = new Bullet(shotCoordinates.x, shotCoordinates.y, this.color, this.angle);
       bullet.draw();
       this.bullets.push(bullet);
-      (new Sound("../sounds/short-laser-gun-shot.wav")).play()
+      GameSounds.fire();
     };
     this.clear = function () {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -129,8 +132,8 @@ class Asteroid {
       let coordinates = [];
       asteroidPaths[this.pathIndex].forEach(c =>{
         coordinates.push({
-          x: getRotatedCoorditates(this.x, this.y, this.x + c.x * this.size, this.y + c.x * this.size, this.angle).x,
-          y: getRotatedCoorditates(this.x, this.y, this.x + c.y * this.size, this.y + c.y * this.size, this.angle).y
+          x: getRotatedCoorditates(this.x, this.y, this.x + c.x * this.size, this.y + c.y * this.size, 0).x,
+          y: getRotatedCoorditates(this.x, this.y, this.x + c.x * this.size, this.y + c.y * this.size, 0).y
         });
       });
       return coordinates;
