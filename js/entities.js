@@ -17,6 +17,7 @@ class Ship {
     this.lifes = 3;
     this.isBoost = false;
     this.isRestored = false;
+    this.isDestroyed = true;
     this.isAbleToMove = true;
 
     this.additionalSpeed = 0;
@@ -30,6 +31,20 @@ class Ship {
       ctx.lineWidth = 2;
       ctx.stroke(this.getPath());
     };
+    this.blick = true;
+    this.blickCount = 0;
+    this.drawBlicking = function () {
+      ctx.strokeStyle = this.color;
+
+      ctx.lineWidth = 2;
+      this.blick ? ctx.stroke(this.getPath()) : null;
+      this.blickCount++;
+      if(this.blickCount > 10){
+        this.blickCount = 0;
+        this.blick = !this.blick;
+      }
+    };
+
     this.update = function () {
       if (this.speed === 0) {
         this.speed = this.additionalSpeed * this.brakes;

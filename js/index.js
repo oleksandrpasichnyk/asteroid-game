@@ -96,6 +96,7 @@ function displayAsteroidsBackground(){
 
 function finishGame(){
   clearInterval(gameRender);
+  GameSounds.gameOver();
   GameSounds.stopBackground();
   GameSounds.stopBoost();
   // GameSounds.break();
@@ -112,12 +113,13 @@ function restoreShip(){
   gameShip.isRestored = false;
   gameShip.isAbleToMove = false;
   gameShip.additionalSpeed = 0;
+  gameShip.bullets = [];
   gameShip.update();
   gameShip.draw();
   GameSounds.stopBoost();
   setTimeout(() => {
     gameShip.isAbleToMove = true;
-  }, 500);
+  }, 1000);
 
   setTimeout(() => {
     gameShip.isRestored = true;
@@ -130,24 +132,26 @@ function updateGameArea() {
   gameShip.speed = 0;
   gameShip.moveAngle = 0;
 
-  if (gameShip.keys && gameShip.keys['ArrowUp']) {
-    gameShip.speed = 5;
-    isBoost = true;
-  }
-  if (gameShip.keys && gameShip.keys['ArrowLeft']) {
-    gameShip.moveAngle = -Math.PI * 1.1;
-  }
-  if (gameShip.keys && gameShip.keys['ArrowRight']) {
-    gameShip.moveAngle = Math.PI * 1.1;
+  if(gameShip.isAbleToMove){
+    if (gameShip.keys && gameShip.keys['ArrowUp']) {
+      gameShip.speed = 5;
+      isBoost = true;
+    }
+    if (gameShip.keys && gameShip.keys['ArrowLeft']) {
+      gameShip.moveAngle = -Math.PI * 1.1;
+    }
+    if (gameShip.keys && gameShip.keys['ArrowRight']) {
+      gameShip.moveAngle = Math.PI * 1.1;
+    }
+    if(isBoost !== gameShip.isBoost){ //&& gameShip.isAbleToMove
+      isBoost ? GameSounds.playBoost() : GameSounds.stopBoost();
+    }
   }
 
-  if(isBoost !== gameShip.isBoost && gameShip.isAbleToMove){
-    console.log(isBoost);
-    isBoost ? GameSounds.playBoost() : GameSounds.stopBoost();
-  }
   gameShip.isBoost = isBoost;
   gameShip.update();
-  gameShip.draw();
+  gameShip.isRestored ? gameShip.draw() : gameShip.drawBlicking();
+
 
   gameShip.bullets.forEach(bullet => {
     bullet.update();
@@ -172,7 +176,7 @@ function updateGameArea() {
         asteroid.destroy();
         gameShip.bullets.splice(gameShip.bullets.indexOf(bullet), 1);
         gameScore += asteroidParams[asteroid.size].score;
-        scoreValue.textContent = gameScore;
+        scoreValue.textContent = gameScore.toString();
       }
     });
     asteroid.update();

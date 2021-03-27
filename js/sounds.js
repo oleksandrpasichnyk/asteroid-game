@@ -29,6 +29,9 @@ export class Sounds {
     this.break = function() {
       (new Sound("sounds/extraShip.wav")).play();
     }
+    this.gameOver = function() {
+      (new Sound("sounds/gameOver.wav")).play();
+    }
     this.playBoost = function() {
       this.boostInterval = setInterval(() => {
         (new Sound("sounds/thrust.wav")).play();
