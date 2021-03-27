@@ -17,7 +17,7 @@ class Ship {
     this.lifes = 3;
     this.isBoost = false;
     this.isRestored = false;
-    this.isDestroyed = true;
+    this.isDestroyed = false;
     this.isAbleToMove = true;
 
     this.additionalSpeed = 0;
@@ -166,7 +166,7 @@ class Asteroid {
       if(this.size === 1){
         gameAsteroids.splice(gameAsteroids.indexOf(this), 1);
         if(gameAsteroids.length < ASTEROIDS_COUNT){
-          let newAsteroid = createRandomAsteroid();
+          let newAsteroid = createRandomAsteroid(gameShip.x, gameShip.y);
           gameAsteroids.push(newAsteroid);
           newAsteroid.draw();
         }

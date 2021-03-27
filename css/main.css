@@ -37,16 +37,18 @@ header {
 
 #modal-window-container {
   position: absolute;
-  width: 70vw;
-  height: 70vh;
+  width: 50vw;
+  height: 50vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: 10vh 10vw;
 }
 
 #modal-window-title {
-  font-size: 2.5em;
+  text-align: center;
+  font-size: 50px;
   margin-bottom: 50px;
 }
 

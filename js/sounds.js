@@ -23,11 +23,22 @@ export class Sounds {
     this.fire = function() {
       (new Sound("sounds/fire.wav")).play();
     }
-    this.bang = function() {
-      (new Sound("sounds/bangMedium.wav")).play();
+    this.destroy = function(size) {
+      switch (size) {
+        case 1:
+          (new Sound("sounds/bangSmall.wav")).play();
+          break;
+        case 2:
+          (new Sound("sounds/bangMedium.wav")).play();
+          break;
+        case 4:
+          (new Sound("sounds/bangLarge.wav")).play();
+          break;
+        default: break;
+      }
     }
     this.break = function() {
-      (new Sound("sounds/extraShip.wav")).play();
+      (new Sound("sounds/bangMedium.wav")).play();
     }
     this.gameOver = function() {
       (new Sound("sounds/gameOver.wav")).play();

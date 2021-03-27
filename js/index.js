@@ -47,7 +47,7 @@ function init() {
   }, 2000);
 
   for (let i = 0; i < ASTEROIDS_COUNT; i++) {
-    let newAsteroid = createRandomAsteroid();
+    let newAsteroid = createRandomAsteroid(gameShip.x, gameShip.y);
     gameAsteroids.push(newAsteroid);
     newAsteroid.draw();
   }
@@ -87,7 +87,7 @@ function startGame(){
 
 function displayAsteroidsBackground(){
   for (let i = 0; i < ASTEROIDS_COUNT; i++) {
-    let newAsteroid = createRandomAsteroid();
+    let newAsteroid = createRandomAsteroid(canvas.width/2, canvas.height/2);
     gameAsteroids.push(newAsteroid);
     newAsteroid.draw();
   }
@@ -95,11 +95,11 @@ function displayAsteroidsBackground(){
 }
 
 function finishGame(){
-  clearInterval(gameRender);
+  // clearInterval(gameRender);
+  gameShip.isDestroyed = true;
   GameSounds.gameOver();
   GameSounds.stopBackground();
   GameSounds.stopBoost();
-  // GameSounds.break();
   modalWindowContainer.style.display = 'flex';
   modalWindowTitle.textContent = 'Your score is ' + gameScore;
 }
@@ -132,7 +132,7 @@ function updateGameArea() {
   gameShip.speed = 0;
   gameShip.moveAngle = 0;
 
-  if(gameShip.isAbleToMove){
+  if(gameShip.isAbleToMove && !gameShip.isDestroyed){
     if (gameShip.keys && gameShip.keys['ArrowUp']) {
       gameShip.speed = 5;
       isBoost = true;
@@ -143,25 +143,29 @@ function updateGameArea() {
     if (gameShip.keys && gameShip.keys['ArrowRight']) {
       gameShip.moveAngle = Math.PI * 1.1;
     }
-    if(isBoost !== gameShip.isBoost){ //&& gameShip.isAbleToMove
+    if(isBoost !== gameShip.isBoost){
       isBoost ? GameSounds.playBoost() : GameSounds.stopBoost();
     }
   }
 
   gameShip.isBoost = isBoost;
-  gameShip.update();
-  gameShip.isRestored ? gameShip.draw() : gameShip.drawBlicking();
+  if(!gameShip.isDestroyed){
+    gameShip.update();
+    gameShip.isRestored ? gameShip.draw() : gameShip.drawBlicking();
 
-
-  gameShip.bullets.forEach(bullet => {
-    bullet.update();
-    bullet.draw();
-  });
+    gameShip.bullets.forEach(bullet => {
+      bullet.update();
+      bullet.draw();
+    });
+  }
   gameAsteroids.forEach(asteroid => {
-    if(gameShip.isRestored){
+    if(gameShip.isRestored && !gameShip.isDestroyed){
       if(shipAsteroidCollision(asteroid)){
         gameShip.lifes--;
         lifesValue.textContent = gameShip.lifes.toString();
+        asteroid.destroy();
+        gameScore += asteroidParams[asteroid.size].score;
+        scoreValue.textContent = gameScore.toString();
         if(gameShip.lifes === 0){
           finishGame();
         }else {
@@ -169,16 +173,17 @@ function updateGameArea() {
           restoreShip();
         }
       };
+
+      gameShip.bullets.forEach(bullet => {
+        if(bulletAsteroidCollision(bullet, asteroid)){
+          GameSounds.destroy(asteroid.size);
+          asteroid.destroy();
+          gameShip.bullets.splice(gameShip.bullets.indexOf(bullet), 1);
+          gameScore += asteroidParams[asteroid.size].score;
+          scoreValue.textContent = gameScore.toString();
+        }
+      });
     }
-    gameShip.bullets.forEach(bullet => {
-      if(bulletAsteroidCollision(bullet, asteroid)){
-        GameSounds.bang();
-        asteroid.destroy();
-        gameShip.bullets.splice(gameShip.bullets.indexOf(bullet), 1);
-        gameScore += asteroidParams[asteroid.size].score;
-        scoreValue.textContent = gameScore.toString();
-      }
-    });
     asteroid.update();
     asteroid.draw();
   });

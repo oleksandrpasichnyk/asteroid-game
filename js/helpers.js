@@ -8,9 +8,9 @@ export function getRotatedCoorditates(xc, yc, x1, y1, angle){
   return { x: x2, y: y2 };
 }
 
-export function createRandomAsteroid(){
-  let x = Math.floor(Math.random() * Math.floor(canvas.width/2 - 100));
-  let y = Math.floor(Math.random() * Math.floor(canvas.height/2 - 100));
+export function createRandomAsteroid(x0, y0){
+  let x = Math.floor(Math.random() * Math.floor(x0 - 100));
+  let y = Math.floor(Math.random() * Math.floor(y0 - 100));
   x = Math.random() > 0.5 ? x : canvas.width - x;
   y = Math.random() > 0.5 ? y : canvas.height - y;
   let angle = Math.floor(Math.random() * Math.floor(360));
@@ -26,37 +26,22 @@ export function bulletAsteroidCollision(bullet, asteroid){
 export function shipAsteroidCollision(asteroid){
   for(let i = 0; i < gameShip.getCoordinates().length; i++){
     if(ctx.isPointInPath(asteroid.getPath(), gameShip.getCoordinates()[i].x, gameShip.getCoordinates()[i].y)){
-      showDots(gameShip.getCoordinates()[i].x, gameShip.getCoordinates()[i].y, asteroid);
+      // showDot(gameShip.getCoordinates()[i].x, gameShip.getCoordinates()[i].y);
       return true;
     }
   }
 
   for(let j = 0; j < asteroid.getCoordinates().length; j++){
     if(ctx.isPointInPath(gameShip.getPath(), asteroid.getCoordinates()[j].x, asteroid.getCoordinates()[j].y)){
-      showDots(asteroid.getCoordinates()[j].x, asteroid.getCoordinates()[j].y, asteroid);
-      ctx.strokeStyle = 'blue';
-      ctx.stroke(gameShip.getPath());
+      // showDot(asteroid.getCoordinates()[j].x, asteroid.getCoordinates()[j].y);
       return true;
     }
   }
   return false;
 }
 
-function showDots(x, y, asteroid){
-  ctx.fillStyle = "green";
-  for(let k = 0; k < asteroid.getCoordinates().length; k++){
-    ctx.beginPath();
-    ctx.arc(asteroid.getCoordinates()[k].x, asteroid.getCoordinates()[k].y, 2, 0, 2 * Math.PI);
-    ctx.fill();
-  }
-  ctx.fillStyle = "yellow";
-  for(let k = 0; k < gameShip.getCoordinates().length; k++){
-    ctx.beginPath();
-    ctx.arc(gameShip.getCoordinates()[k].x, gameShip.getCoordinates()[k].y, 2, 0, 2 * Math.PI);
-    ctx.fill();
-  }
+function showDot(x, y){
   ctx.fillStyle = "red";
-  ctx.beginPath();
   ctx.arc(x, y, 4, 0, 2 * Math.PI);
   ctx.fill();
 }
