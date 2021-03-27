@@ -1,5 +1,5 @@
 import { GameSounds } from './sounds.js';
-import { Ship, Asteroid } from './entities.js';
+import { Ship } from './entities.js';
 import { bulletAsteroidCollision, createRandomAsteroid, shipAsteroidCollision } from './helpers.js';
 
 const canvas = document.getElementById("canvas");
@@ -73,6 +73,7 @@ function startGame(){
     modalWindowContainer.style.display = 'none';
     header.style.visibility = 'visible';
     clearInterval(backgroundRender);
+    clearInterval(gameRender);
     scoreValue.textContent = 0;
     gameScore = 0;
     gameAsteroids = [];
@@ -95,7 +96,6 @@ function displayAsteroidsBackground(){
 }
 
 function finishGame(){
-  // clearInterval(gameRender);
   gameShip.isDestroyed = true;
   GameSounds.gameOver();
   GameSounds.stopBackground();
@@ -105,6 +105,7 @@ function finishGame(){
 }
 
 function restoreShip(){
+
   gameShip.x = canvas.width / 2;
   gameShip.y = canvas.height / 2;
   gameShip.speed = 0;
@@ -114,7 +115,7 @@ function restoreShip(){
   gameShip.isAbleToMove = false;
   gameShip.additionalSpeed = 0;
   gameShip.bullets = [];
-  gameShip.update();
+  // gameShip.update();
   gameShip.draw();
   GameSounds.stopBoost();
   setTimeout(() => {

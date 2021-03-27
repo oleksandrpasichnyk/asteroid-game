@@ -1,7 +1,7 @@
 import { createPath, asteroidPath1, asteroidPath2, asteroidPath3 } from './paths.js';
 import { ctx, ASTEROIDS_SPEED, FPS, ASTEROIDS_COUNT, gameAsteroids, gameShip, asteroidParams } from './index.js';
 import { getRotatedCoorditates, createRandomAsteroid } from './helpers.js';
-import { Sound, GameSounds } from './sounds.js';
+import { GameSounds } from './sounds.js';
 
 const asteroidPaths = [asteroidPath1, asteroidPath2, asteroidPath3];
 const shipPath = [{x: 15, y: 15}, {x: 0, y: -30}, {x: -15, y: 15}, {x: -10, y: 0}, {x: 10, y: 0}, {x: 15, y: 15}];
