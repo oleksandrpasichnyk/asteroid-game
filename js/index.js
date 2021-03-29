@@ -62,9 +62,7 @@ function init() {
     gameShip.keys[e.code] = (e.type == "keydown");
   })
   window.addEventListener('keyup', function (e) {
-    if(e.code === 'Space'){
-      gameShip.shot();
-    }
+    if(e.code === 'Space' && !gameShip.isDestroyed) gameShip.shot();
   })
 }
 
@@ -115,7 +113,6 @@ function restoreShip(){
   gameShip.isAbleToMove = false;
   gameShip.additionalSpeed = 0;
   gameShip.bullets = [];
-  // gameShip.update();
   gameShip.draw();
   GameSounds.stopBoost();
   setTimeout(() => {

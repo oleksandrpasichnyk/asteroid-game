@@ -46,7 +46,7 @@ export class Sounds {
     this.playBoost = function() {
       this.boostInterval = setInterval(() => {
         (new Sound("sounds/thrust.wav")).play();
-      }, 100);
+      }, 250);
     }
     this.stopBoost = function() {
       clearInterval(this.boostInterval);
